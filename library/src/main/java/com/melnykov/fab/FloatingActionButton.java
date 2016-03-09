@@ -91,7 +91,6 @@ public class FloatingActionButton extends ImageButton {
         setMeasuredDimension(size, size);
     }
 
-    @SuppressLint("NewApi")
     private void init(Context context, AttributeSet attributeSet) {
         mVisible = true;
         mColorNormal = getColor(R.color.material_blue_500);
@@ -102,11 +101,7 @@ public class FloatingActionButton extends ImageButton {
         mShadow = true;
         mScrollThreshold = getResources().getDimensionPixelOffset(R.dimen.fab_scroll_threshold);
         mShadowSize = getDimension(R.dimen.fab_shadow_size);
-        if (hasLollipopApi()) {
-            StateListAnimator stateListAnimator = AnimatorInflater.loadStateListAnimator(context,
-                    R.anim.fab_press_elevation);
-            setStateListAnimator(stateListAnimator);
-        }
+        updateStateListAnimator(context);
         if (attributeSet != null) {
             initAttributes(context, attributeSet);
         }
@@ -215,15 +210,15 @@ public class FloatingActionButton extends ImageButton {
             setBackgroundDrawable(drawable);
         }
     }
-
-    private int getMarginBottom() {
-        int marginBottom = 0;
-        final ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-            marginBottom = ((ViewGroup.MarginLayoutParams) layoutParams).bottomMargin;
+    
+    @SuppressWarnings("deprecation")
+    @SuppressLint("NewApi")
+    private void updateStateListAnimator(Context context) {
+        if (hasLollipopApi()) {
+            StateListAnimator stateListAnimator = AnimatorInflater.loadStateListAnimator(context, R.anim.fab_press_elevation);
+            setStateListAnimator(stateListAnimator);
         }
-        return marginBottom;
-    }
+    }    
 
     public void setColorNormal(int color) {
         if (color != mColorNormal) {
@@ -344,11 +339,6 @@ public class FloatingActionButton extends ImageButton {
                 ViewHelper.setScaleX(this, scale);
                 ViewHelper.setScaleY(this, scale);
             }
-
-            // On pre-Honeycomb a translated view is still clickable, so we need to disable clicks manually
-            if (!hasHoneycombApi()) {
-                setClickable(visible);
-            }
         }
     }
 
@@ -416,10 +406,6 @@ public class FloatingActionButton extends ImageButton {
 
     private boolean hasJellyBeanApi() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
-    }
-
-    private boolean hasHoneycombApi() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     }
 
     private static int darkenColor(int color) {
